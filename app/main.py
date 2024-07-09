@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import asynccontextmanager
 from typing import Annotated
 
 from fastapi import FastAPI, Depends
@@ -12,7 +13,29 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.version_check import perform_version_check
 
-app = FastAPI(title="LISA")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize the status of all services on startup
+    status_manager.initialize_statuses(config_manager.services.values())
+
+    # Run the initial health checks asynchronously
+    await perform_periodic_health_checks()
+
+    # Start the schedule
+    scheduler.start()
+
+    # Every five minutes ping all the apps
+    scheduler.add_job(perform_periodic_health_checks, 'interval', minutes=5)
+
+    # Run the app
+    yield
+
+    # On shutdown, stop the scheduler
+    scheduler.shutdown()
+
+
+app = FastAPI(title="LISA", lifespan=lifespan)
 config_manager = ConfigManager("config/services.yaml")
 scheduler = AsyncIOScheduler()
 status_manager = HealthStatusManager()
@@ -74,26 +97,6 @@ async def root():
 
 
 # -------------- Schedules -----------------
-@app.on_event("startup")
-async def start_scheduler():
-
-    # Initialize the status of all services on startup
-    status_manager.initialize_statuses(config_manager.services.values())
-
-    # Run the initial health checks asynchronously
-    await perform_periodic_health_checks()
-
-    # Start the schedule
-    scheduler.start()
-
-    # Every five minutes ping all the apps
-    scheduler.add_job(perform_periodic_health_checks, 'interval', minutes=5)
-
-
-@app.on_event("shutdown")
-def shutdown_scheduler():
-    scheduler.shutdown()
-
 
 async def perform_periodic_health_checks():
     """
@@ -106,5 +109,4 @@ async def perform_periodic_health_checks():
         task = asyncio.create_task(perform_health_check(service, status_manager))
         tasks.append(task)
     await asyncio.gather(*tasks)
-
 
