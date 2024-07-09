@@ -33,7 +33,7 @@ class HealthStatusManager:
     def update_status(self, service_id: str, status: Status):
         self._statuses[service_id] = status
 
-    async def get_status(self, service_id: str) -> Status:
+    def get_status(self, service_id: str) -> Status:
         try:
             return self._statuses[service_id]
         except KeyError:

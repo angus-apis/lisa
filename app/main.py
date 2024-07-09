@@ -1,7 +1,9 @@
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 from typing import Annotated
 
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI, Depends
 from pydantic import Json
 from starlette.responses import FileResponse, JSONResponse
@@ -12,6 +14,8 @@ from app.load_image import load_image
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.version_check import perform_version_check
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -29,11 +33,17 @@ async def lifespan(_app: FastAPI):
     # Run the initial health checks asynchronously
     await perform_periodic_health_checks()
 
-    # Start the schedule
-    scheduler.start()
+    # Setup Cron pings for each service
+    for service in config_manager.services.values():
 
-    # Every five minutes ping all the apps
-    scheduler.add_job(perform_periodic_health_checks, 'interval', minutes=5)
+        # Extract the ping cron for this given service
+        ping_cron = service.ping_cron
+        logger.info(f"Scheduling health check for {service.name} with cron '{ping_cron}'")
+
+        # Add this cron to the schedule
+        scheduler.add_job(perform_health_check, CronTrigger.from_crontab(ping_cron), args=[service, status_manager])
+
+    scheduler.start()
 
     # Run the app
     yield
@@ -66,7 +76,7 @@ async def get_service_health(
     :param service_id: The ID of the service
     :param manager: An instance of a health status manager to fetch status' from
     """
-    status: Status = await manager.get_status(service_id)
+    status: Status = manager.get_status(service_id)
     return JSONResponse({"service_id": service_id, "status": status.name})
 
 
