@@ -15,7 +15,14 @@ from app.version_check import perform_version_check
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
+    """
+    Defines the lifespan of a FastAPI application,
+    first we start the schedules and initialies our status managers,
+    we then accept requests using YIELD and after this we can shutdown the
+    schedule.
+    :param _app: The instance of the FastAPI application.
+    """
     # Initialize the status of all services on startup
     status_manager.initialize_statuses(config_manager.services.values())
 
