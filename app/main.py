@@ -40,8 +40,23 @@ async def lifespan(_app: FastAPI):
         ping_cron = service.ping_cron
         logger.info(f"Scheduling health check for {service.name} with cron '{ping_cron}'")
 
+        def run_health_check_cron(service_arg: Service, status_manager_arg: HealthStatusManager):
+            """
+            Tiny function that allows us to do checks before we perform each health check when
+            run from a cron, such as check ENV variables
+            :param service_arg:
+            :param status_manager_arg:
+            :return:
+            """
+
+            # Check the global ENV to see if ping crons are enabled
+            if config_manager.is_ping_enabled():
+                perform_health_check(service_arg, status_manager_arg)
+            else:
+                logger.warning("Cron ping is currently disabled in ENV settings")
+                
         # Add this cron to the schedule
-        scheduler.add_job(perform_health_check, CronTrigger.from_crontab(ping_cron), args=[service, status_manager])
+        scheduler.add_job(run_health_check_cron, CronTrigger.from_crontab(ping_cron), args=[service, status_manager])
 
     scheduler.start()
 
