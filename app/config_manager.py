@@ -44,7 +44,7 @@ class ConfigManager:
             config_data = yaml.safe_load(file)
             return {service['id']: Service(**service) for service in config_data['services']}
 
-    def _get_global_config_item(self, key: str) -> str:
+    def get_global_config_item(self, key: str) -> str:
         """
         Get a single config item from the .env file
         :param key: the config item to get e.g. APP_ENABLED
@@ -57,13 +57,6 @@ class ConfigManager:
         if not service:
             raise HTTPException(status_code=404, detail="Service not found")
         return service
-
-    def is_ping_enabled(self) -> bool:
-        """
-        Are cron pings currently enabled or not?
-        :return: Bool
-        """
-        return self._get_global_config_item("PING_ENABLED").lower() == "true"
 
 
 def _load_global_config() -> Dict[str, str]:
