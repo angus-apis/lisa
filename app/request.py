@@ -24,7 +24,8 @@ async def perform_async_request(
         url: str,
         timeout_threshold: int) -> AsyncResponse:
     """
-    Perform an asynchronous HTTP GET request.
+    Perform an asynchronous HTTP GET request. This is so a slow
+    connection to a service does not slow down the whole application
     :param url: URL to make the request to.
     :param timeout_threshold: Maximum time in seconds for the request before considering it timed out.
     :return: AsyncResponse object containing response data

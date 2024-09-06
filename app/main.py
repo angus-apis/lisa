@@ -23,12 +23,12 @@ async def lifespan(_app: FastAPI):
     """
     Defines the lifespan of a FastAPI application,
     first we start the schedules and initialies our status managers,
-    we then accept requests using YIELD and after this we can shutdown the
+    we then accept requests using YIELD and after this we can shut down the
     schedule.
     :param _app: The instance of the FastAPI application.
     """
-    # Initialize the status of all services on startup
-    status_manager.initialize_statuses(config_manager.services.values())
+    # Initialize the status of all services on startup, to avoid 404's as soon as the app starts up
+    status_manager.initialise_statuses(config_manager.services.values())
 
     # Run the initial health checks asynchronously
     await perform_periodic_health_checks()

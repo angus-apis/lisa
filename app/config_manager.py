@@ -25,7 +25,7 @@ class Service(BaseModel):
     description: str
     health_check_url: str
     version_url: str
-    ping_cron: str = "*/5 6-21 * * *" # Default to every 5 minutes between 6am and 9pm
+    ping_cron: str = "*/5 6-21 * * *"  # Default to every 5 minutes between 6am and 9pm
 
 
 class ConfigManager:
