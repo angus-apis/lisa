@@ -4,7 +4,7 @@ services:
     description: A really cool, trendy service
     health_check_url: http://localhost:5001/health
     version_url: http://localhost:5001/version
-    ping_cron: "*/2 * * * *" #Every 2 minutes
+    ping_cron: "*/2 * * * *" # Every 2 minutes
 
   - name: Service B
     id: service_b

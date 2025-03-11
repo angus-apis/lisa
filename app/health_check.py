@@ -22,7 +22,7 @@ class HealthStatusManager:
     def __init__(self):
         self._statuses: Dict[str, Status] = {}
 
-    def initialize_statuses(self, services):
+    def initialise_statuses(self, services):
         """
         Set all initial services to unknown
         to avoid 404 for existing services
