@@ -10,6 +10,8 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+from app.singleton import Singleton
+
 
 class Status(Enum):
     UP = auto()           # App is up and running normally
@@ -27,7 +29,7 @@ class Service(BaseModel):
     ping_cron: str = "*/5 6-21 * * *"  # Default to every 5 minutes between 6am and 9pm
 
 
-class ConfigManager:
+class ConfigManager(Singleton):
     def __init__(self, config_path: str):
         self.config_path = config_path
         self.services = self.load_config()

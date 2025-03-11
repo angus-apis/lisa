@@ -4,8 +4,10 @@ from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse, FileResponse
 
 from app.config_manager import Status, Service
+from app.dependencies import get_status_manager, get_config_manager
 from app.health_check import HealthStatusManager
 from app.load_image import load_image
+from app.version_check import perform_version_check
 
 router = APIRouter()
 
@@ -46,10 +48,12 @@ async def get_service_badge(
 @router.get("/version/{service_id}")
 async def get_service_version(
         service_id: str,
+        config_manager: Annotated[Service, Depends(get_config_manager)]
 ) -> JSONResponse:
     """
     Get the current version of a service
     :param service_id: The ID of the service to get the version of
+    :param config_manager: The config manager to fetch the service from
     """
 
     service: Service = config_manager.get_service_by_id(service_id)

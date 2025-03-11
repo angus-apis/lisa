@@ -12,17 +12,10 @@ def get_status_manager():
     return HealthStatusManager()
 
 
-def get_scheduler():
-    """
-    Tiny helper function used to retrieve an instance
-    of the scheduler. For use with FastAPI dependency injection
-    """
-    return AsyncIOScheduler()
-
-
 def get_config_manager():
     """
     Tiny helper function used to retrieve an instance
     of the config manager. For use with FastAPI dependency injection
     """
     return ConfigManager("config/services.yaml")
+

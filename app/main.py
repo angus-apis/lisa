@@ -1,19 +1,14 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from typing import Annotated
 
-from apscheduler.triggers.cron import CronTrigger
-from fastapi import FastAPI, Depends
-from starlette.responses import FileResponse, JSONResponse
-
-from app.config_manager import ConfigManager, Service, Status
-from app.dependencies import get_config_manager, get_scheduler, get_status_manager
-from app.health_check import perform_health_check, HealthStatusManager
-from app.load_image import load_image
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+from fastapi import FastAPI
 
-from app.version_check import perform_version_check
+from app.dependencies import get_config_manager, get_status_manager
+from app.health_check import perform_health_check
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +25,8 @@ async def lifespan(_app: FastAPI):
 
     # Dependency
     config_manager = get_config_manager()
-    scheduler = get_scheduler()
     status_manager = get_status_manager()
+    scheduler = AsyncIOScheduler()
 
     # Initialize the status of all services on startup, to avoid 404's as soon as the app starts up
     status_manager.initialise_statuses(config_manager.services.values())
@@ -70,8 +65,8 @@ async def perform_periodic_health_checks():
 
     # Check the health of all services asynchronously to avoid waiting for unresponsive apps
     tasks = []
-    for service in config_manager.services.values():
-        task = asyncio.create_task(perform_health_check(service, status_manager))
+    for service in get_config_manager().services.values():
+        task = asyncio.create_task(perform_health_check(service, get_status_manager()))
         tasks.append(task)
     await asyncio.gather(*tasks)
 

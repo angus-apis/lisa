@@ -8,11 +8,12 @@ from fastapi import HTTPException
 from app.config_manager import Status, Service
 
 from app.request import perform_async_request, AsyncResponse
+from app.singleton import Singleton
 
 logger = logging.getLogger(__name__)
 
 
-class HealthStatusManager:
+class HealthStatusManager(Singleton):
     """
     A HealthStatus manager stores
     the health status of services in memory
