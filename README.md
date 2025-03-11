@@ -18,7 +18,6 @@ Logging, information & system analysis
 The `config/services.yaml` file is used to define services that LISA should monitor. The structure of the file is explained below...
 
 ```yaml
-
 microservices:
   - name: User Service  # The display name of the microservice
     id: user_service # Unique slug for the service
