@@ -14,8 +14,8 @@ IMAGE_DIR = os.path.join(PROJECT_DIR, 'images')
 
 # Map status to image filename
 status_to_image = {
-    Status.UP: "normal.svg",
-    Status.DOWN: "error.svg",
+    Status.UP: "up.svg",
+    Status.DOWN: "down.svg",
     Status.DODGY: "dodgy.svg",
     Status.UNKNOWN: "mystery.svg"
 }
