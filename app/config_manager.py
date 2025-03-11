@@ -16,8 +16,6 @@ class Status(Enum):
     DOWN = auto()         # App is not responding to health check
     DODGY = auto()        # App took a long time to respond
     UNKNOWN = auto()      # Status is unknown (not yet checked status)
-    MAINTENANCE = auto()  # App is down for planned maintenance
-    FAILED = auto()       # An error occurred checking the health
 
 
 class Service(BaseModel):
