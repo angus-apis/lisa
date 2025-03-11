@@ -8,7 +8,7 @@ from fastapi import FastAPI
 
 from app.dependencies import get_config_manager, get_status_manager
 from app.health_check import perform_health_check
-
+from app.routes import router
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +54,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="LISA", lifespan=lifespan)
+app.include_router(router)
 
 
 # -------------- Schedules -----------------
