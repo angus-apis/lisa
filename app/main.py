@@ -5,7 +5,6 @@ from typing import Annotated
 
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI, Depends
-from pydantic import Json
 from starlette.responses import FileResponse, JSONResponse
 
 from app.config_manager import ConfigManager, Service, Status
@@ -97,7 +96,7 @@ async def get_service_badge(
 @app.get("/version/{service_id}")
 async def get_service_version(
         service_id: str,
-) -> Json:
+) -> JSONResponse:
     """
     Get the current version of a service
     :param service_id: The ID of the service to get the version of
