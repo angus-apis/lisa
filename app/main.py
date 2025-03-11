@@ -8,6 +8,7 @@ from fastapi import FastAPI, Depends
 from starlette.responses import FileResponse, JSONResponse
 
 from app.config_manager import ConfigManager, Service, Status
+from app.dependencies import get_config_manager, get_scheduler, get_status_manager
 from app.health_check import perform_health_check, HealthStatusManager
 from app.load_image import load_image
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -26,6 +27,12 @@ async def lifespan(_app: FastAPI):
     schedule.
     :param _app: The instance of the FastAPI application.
     """
+
+    # Dependency
+    config_manager = get_config_manager()
+    scheduler = get_scheduler()
+    status_manager = get_status_manager()
+
     # Initialize the status of all services on startup, to avoid 404's as soon as the app starts up
     status_manager.initialise_statuses(config_manager.services.values())
 
@@ -52,64 +59,6 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="LISA", lifespan=lifespan)
-config_manager = ConfigManager("config/services.yaml")
-scheduler = AsyncIOScheduler()
-status_manager = HealthStatusManager()
-
-
-def get_status_manager():
-    """
-    Tiny helper function used to retrieve an instance
-    of the health status manager. For use with FastAPI dependency injection
-    """
-    return status_manager
-
-
-@app.get("/health/{service_id}")
-async def get_service_health(
-        service_id: str,
-        manager: Annotated[HealthStatusManager, Depends(get_status_manager)]
-):
-    """
-    Fetch the health status of a service
-    :param service_id: The ID of the service
-    :param manager: An instance of a health status manager to fetch status' from
-    """
-    status: Status = manager.get_status(service_id)
-    return JSONResponse({"service_id": service_id, "status": status.name})
-
-
-@app.get("/badge/{service_id}")
-async def get_service_badge(
-        service_id: str,
-        manager: Annotated[HealthStatusManager, Depends(get_status_manager)]
-) -> FileResponse:
-    """
-    Generate an SVG badge which indicates the status
-    of this service
-    :param service_id: The ID of the service to get the badge of
-    :param manager: An instance of a health status manager to fetch status' from
-    """
-    return await load_image(manager.get_status(service_id))
-
-
-@app.get("/version/{service_id}")
-async def get_service_version(
-        service_id: str,
-) -> JSONResponse:
-    """
-    Get the current version of a service
-    :param service_id: The ID of the service to get the version of
-    """
-
-    service: Service = config_manager.get_service_by_id(service_id)
-    version: str = await perform_version_check(service)
-    return JSONResponse({"version": version})
-
-
-@app.get("/")
-async def root():
-    return {"message": "Welcome to LISA"}
 
 
 # -------------- Schedules -----------------
