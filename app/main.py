@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(_app: FastAPI):
     """
     Defines the lifespan of a FastAPI application,
-    first we start the schedules and initialies our status managers,
+    first we start the schedules and initializes our status managers,
     we then accept requests using YIELD and after this we can shut down the
     schedule.
     :param _app: The instance of the FastAPI application.
